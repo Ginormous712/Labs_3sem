@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <random>
+#include <string>
 
 using namespace std;
 class Date 
@@ -23,7 +24,44 @@ public:
 		this->second = second;
 	}
 
-	/*Method for checking the rightness of date*/
+
+	/*
+		Nessary method to avoid repetitive code
+	*/
+	bool is_leap_year()
+	{
+		return ((this->year % 4 == 0) && (this->year % 100 != 0) && (this->year % 400 == 0));
+	}
+
+	/*
+		Nessary method to avoid repetitive code
+	*/
+	int days_in_month()
+	{
+		if (this->month == 1 || this->month == 3 || this->month == 5 || this->month == 7 || this->month == 8 || this->month == 10 || this->month == 12)
+		{
+			return 31;
+		}
+		else if (this->month == 4 || this->month == 6 || this->month == 9 || this->month == 11)
+		{
+			return 30;
+		}
+		else
+		{
+			if (is_leap_year)
+			{
+				return 29;
+			}
+			else
+			{
+				return 28;
+			}
+		}
+	}
+
+	/*
+		Method for checking the rightness of date
+	*/
 	bool check_date()
 	{
 		if (this->year < 0)
@@ -35,30 +73,7 @@ public:
 		{
 			return false;
 		}
-
-		/*Variable <days_in_month> for checking the rightness of <date.day>*/
-		unsigned int days_in_month;
-		
-		if (this->month == 1 || this->month == 3 || this->month == 5 || this->month == 7 || this->month == 8 || this->month == 10 || this->month == 12)
-		{
-			days_in_month = 31;
-		}
-		else if (this->month == 4 || this->month == 6 || this->month == 9 || this->month == 11)
-		{
-			days_in_month = 30;
-		}
-		else
-		{
-			if ((this->year % 4 == 0) && !(this->year % 100 == 0) && (this->year % 400 == 0))
-			{
-				days_in_month = 29;
-			}
-			else
-			{
-				days_in_month = 28;
-			}
-		}
-		if (this->day < 0 || this->day > days_in_month)
+		if (this->day < 0 || this->day > days_in_month())
 		{
 			return false;
 		}
@@ -193,27 +208,7 @@ public:
 			difference.day = difference.day + compared_date.day - this->day;
 			if (difference.day < 0)
 			{
-				unsigned int days_in_month;
-				if (this->month == 1 || this->month == 3 || this->month == 5 || this->month == 7 || this->month == 8 || this->month == 10 || this->month == 12)
-				{
-					days_in_month = 31;
-				}
-				else if (this->month == 4 || this->month == 6 || this->month == 9 || this->month == 11)
-				{
-					days_in_month = 30;
-				}
-				else
-				{
-					if ((this->year % 4 == 0) && !(this->year % 100 == 0) && (this->year % 400 == 0))
-					{
-						days_in_month = 29;
-					}
-					else
-					{
-						days_in_month = 28;
-					}
-				}
-				difference.day = difference.day + days_in_month;
+				difference.day = difference.day + days_in_month();
 				difference.month--;
 			}
 			difference.month = difference.month + compared_date.month - this->month;
@@ -250,27 +245,7 @@ public:
 			difference.day = difference.day + this->day - compared_date.day;
 			if (difference.day < 0)
 			{
-				unsigned int days_in_month;
-				if (compared_date.month == 1 || compared_date.month == 3 || compared_date.month == 5 || compared_date.month == 7 || compared_date.month == 8 || compared_date.month == 10 || compared_date.month == 12)
-				{
-					days_in_month = 31;
-				}
-				else if (compared_date.month == 4 || compared_date.month == 6 || compared_date.month == 9 || compared_date.month == 11)
-				{
-					days_in_month = 30;
-				}
-				else
-				{
-					if ((compared_date.year % 4) == 0)
-					{
-						days_in_month = 29;
-					}
-					else
-					{
-						days_in_month = 28;
-					}
-				}
-				difference.day = difference.day + days_in_month;
+				difference.day = difference.day + compared_date.days_in_month();
 				difference.month--;
 			}
 			difference.month = difference.month + this->month - compared_date.month;
@@ -289,28 +264,66 @@ public:
 	}
 
 	/*
-		Method for counting chosen units of time
+		Method for counting chosen units of time 
+		(with initial date for counting days/hours/minutes/seconds
 	*/
-	unsigned long long number_of_units_of_time(const char mode, const Date &initial_date)
+	unsigned long long number_of_units_of_time(const char mode, const Date& initial_date)
 	{
+		/*
+			We make a copy of date to avoid any changes in variable
+		*/
+		Data copy_of_date {this->year, this->month, this->day, this->hour, this->minute, this->second};
+		//int months = this->month + this->year * 12;
+
+		/*
+			Counting months
+		*/
+		//copy_of_date.month += copy_of_month.year * 12;
+
+		/*
+			Counting days, that's a main problem, because we have different 
+			number of days in different months and years (leap year)
+		*/
+		/*
+		do
+		{
+			for (size_t i = 0; i < months; i++)
+			{
+
+			}
+			while (copy_of_date.months > 0)
+			{
+				
+
+				copy_of_date.day += .days_in_month()
+
+					copy_of_date.month--;
+			}
+			copy_of_date.year--;
+		} while (copy_of_date.year > 0)
+		*/
+
 		if (mode == 'd')
 		{
-
+			return copy_of_date.day;
 		}
 		else if (mode == 'h')
 		{
-
+			return copy_of_date.day * 24 + copy_of_date.hour;
 		}
 		else if (mode == 'm')
 		{
-
+			return (copy_of_date.day * 24 + copy_of_date.hour) * 60;
 		}
 		else if (mode == 's')
 		{
-
+			return (copy_of_date.day * 24 + copy_of_date.hour) * 3600;
 		}
 	}
-
+	
+	/*
+		Method for counting chosen units of time
+	*/
 	unsigned long long number_of_units_of_time(const char mode)
 	{
 		if (mode == 'y')
@@ -332,11 +345,15 @@ public:
 			Kim Larson's formula of defining the day of week:
 			W = (d + 2 * m + 3 * (m + 1) / 5 + y + y / 4 - y / 100 + y / 400) mod 7
 		*/
-		if (this->month == 1 || this->month == 2) {
-			this->month += 12;
-			this->year--;
+		if (this->month == 1 || this->month == 2) 
+		{
+			/*
+				New variables to avoid changes in variable
+			*/
+			int month = this->month + 12;
+			int year = this->year - 1;
 		}
-		unsigned int index_of_week = (this->day + 2 * this->month + 3 * (this->month + 1) / 5 + this->year + year / 4 - this->year / 100 + this->year / 400) % 7;
+		unsigned int index_of_week = (this->day + 2 * month + 3 * (month + 1) / 5 + year + year / 4 - year / 100 + year / 400) % 7;
 		switch (index_of_week)
 		{
 		case 0: return "Monday"; break;
