@@ -264,45 +264,47 @@ public:
 	}
 
 	/*
-		Method for counting chosen units of time 
-		(with initial date for counting days/hours/minutes/seconds
+		Methods for counting chosen units of time (with initial date 
+		for counting days/hours/minutes/seconds and without for year/month)
 	*/
+	unsigned long long number_of_units_of_time(const char mode)
+	{
+		if (mode == 'y')
+		{
+			return this->year;
+		}
+		else
+		{
+			return this->year * 12 + this->month;
+		}
+	}
+
 	unsigned long long number_of_units_of_time(const char mode, const Date& initial_date)
 	{
 		/*
 			We make a copy of date to avoid any changes in variable
 		*/
-		Data copy_of_date {this->year, this->month, this->day, this->hour, this->minute, this->second};
-		//int months = this->month + this->year * 12;
-
+		Data copy_of_date {this->year, initial_date.month->month, this->day, this->hour, this->minute, this->second};
+		
 		/*
 			Counting months
 		*/
-		//copy_of_date.month += copy_of_month.year * 12;
+		int months = this->month + this->year * 12;
 
 		/*
-			Counting days, that's a main problem, because we have different 
-			number of days in different months and years (leap year)
+			Counting days, adding days in month on every step
 		*/
-		/*
-		do
+		
+		for (; months > 0; months--)
 		{
-			for (size_t i = 0; i < months; i++)
+			copy_of_date.day += copy_of_date.days_in_month();
+			copy_of_date.month++;
+			if (copy_of_date.month == 13)
 			{
-
+				copy_of_date.month = 1;
 			}
-			while (copy_of_date.months > 0)
-			{
-				
-
-				copy_of_date.day += .days_in_month()
-
-					copy_of_date.month--;
-			}
-			copy_of_date.year--;
-		} while (copy_of_date.year > 0)
-		*/
-
+		}
+		
 		if (mode == 'd')
 		{
 			return copy_of_date.day;
@@ -320,22 +322,141 @@ public:
 			return (copy_of_date.day * 24 + copy_of_date.hour) * 3600;
 		}
 	}
-	
-	/*
-		Method for counting chosen units of time
-	*/
-	unsigned long long number_of_units_of_time(const char mode)
+
+	void add_time(const long long time, const char mode)
 	{
 		if (mode == 'y')
 		{
-			return this->year;
+			this->year += time;
+		}
+		else if (mode == 'M')
+		{
+			this->month += time;
+			if (this->month > 12)
+			{
+				this->year += this->month / 12;
+				this->month = (this->month % 12) + 1;
+			}
+		}
+		else if (mode == 'd')
+		{
+			while (time > (days_in_month() - this->day))
+			{
+				time -= days_in_month();
+				this->month++;
+				if (this->month > 12)
+				{
+					this->month = 1;
+					this->year++;
+				}
+			}
+			this->day += time;
+			}
+		}
+		else if (mode == 'h')
+		{
+			while (time > (23 - this->hour))
+			{
+				this->day++;
+				if (this->day > days_in_month())
+				{
+					this->day = 1;
+					this->month++;
+					if (this->month > 12)
+					{
+						this->month = 1;
+						this->year++;
+					}
+				}
+				time -= 24;
+			}
+			this->hour += time;
+		else if (mode == 'm')
+		{
+			while (time > (59 - this->minute))
+			{
+				this->hour++;
+				if (this->hour > 23)
+				{
+					this->hour = 0;
+					this->day++;
+					if (this->day > days_in_month())
+					{
+						this->day = 1;
+						this->month++;
+						if (this->month > 12)
+						{
+							this->month = 1;
+							this->year++;
+						}
+					}
+				}
+				time -= 60;
+			}
+			this->minute += time;
 		}
 		else
 		{
-			return this->year * 12 + this->month;
+			while (time > (59 - this->second))
+			{
+				this->minute++;
+				if (this->minute > 59)
+				{
+					this->hour++;
+					if (this->hour > 23)
+					{
+						this->hour = 0;
+						this->day++;
+						if (this->day > days_in_month())
+						{
+							this->day = 1;
+							this->month++;
+							if (this->month > 12)
+							{
+								this->month = 1;
+								this->year++;
+							}
+						}
+					}
+				}
+				time -= 60;
+			}
+			this->second += time;
 		}
 	}
 
+	void subtract_time(const long long time, const char mode)
+	{
+		/*
+		if (mode == 'y')
+		{
+			this->year -= time;
+		}
+		else if (mode == 'M')
+		{
+			if (time > this->month + 1)
+			{
+
+			}
+		}
+		else if (mode == 'd')
+		{
+
+		}
+		else if (mode == 'h')
+		{
+
+		}
+		else if (mode == 'm')
+		{
+
+		}
+		else
+		{
+
+		}
+		*/
+	}
 	/*
 		Method for defining day of the week
 	*/
