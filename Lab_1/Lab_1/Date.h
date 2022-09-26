@@ -4,7 +4,7 @@
 #include <string>
 
 using namespace std;
-class Date 
+class Date
 {
 private:
 	int year;
@@ -62,39 +62,57 @@ public:
 	/*
 		Method for checking the rightness of date
 	*/
-	bool check_date()
+	bool check_date(const bool year = true, const bool month = true, const bool day = true,
+		const bool hour = true, const bool minute = true, const bool second = true)
 	{
-		if (this->year < 0)
+		if (year)
 		{
-			return false;
+			if (this->year < 0)
+			{
+				return false;
+			}
 		}
-		
-		if (this->month < 1 || this->month > 12)
+		if (month)
 		{
-			return false;
+			if (this->month < 1 || this->month > 12)
+			{
+				return false;
+			}
 		}
-		if (this->day < 0 || this->day > days_in_month())
+		if (day)
 		{
-			return false;
+			if (this->day < 1 || this->day > days_in_month())
+			{
+				return false;
+			}
 		}
-		if (this->hour < 0 || this->hour > 23)
+		if (hour)
 		{
-			return false;
+			if (this->hour < 0 || this->hour > 23)
+			{
+				return false;
+			}
 		}
-		if (this->minute < 0 || this->minute > 59)
+		if (minute)
 		{
-			return false;
+			if (this->minute < 0 || this->minute > 59)
+			{
+				return false;
+			}
 		}
-		if (this->second < 0 || this->second > 59)
+		if (second)
 		{
-			return false;
+			if (this->second < 0 || this->second > 59)
+			{
+				return false;
+			}
 		}
 		return true;
 	}
 
 	/*
 		Method that returns:
-			"0": if compared date is bigger; 
+			"0": if compared date is bigger;
 			"1": if this date is bigger;
 			"2": if dates are equal.
 	*/
@@ -172,25 +190,25 @@ public:
 	/*
 		Method for defining differnce with some date and returns it as a some date
 	*/
-	Date difference_with_date(const Date &compared_date)
+	Date difference_with_date(const Date& compared_date)
 	{
 		Date difference;
 		/*
 			Algorithm is simple: starting from seconds to years
 			we subtract from the bigger date the lower one.
-			If it is less then 0, then we decrement elder rank of date 
+			If it is less then 0, then we decrement elder rank of date
 			(f.e.: month <- day) and add the maximum of rank (f.e.: 60 for minutes).
-			As a result we get a date, that is a difference 
+			As a result we get a date, that is a difference
 		*/
 		if (bigger_then_date(compared_date) == 0)
 		{
-			difference.second = compared_date.second - this->second; 
-			if (difference.second < 0) 
+			difference.second = compared_date.second - this->second;
+			if (difference.second < 0)
 			{
 				difference.second = difference.second + 60;
 				difference.minute--;
 			}
-			
+
 			difference.minute = difference.minute + compared_date.minute - this->minute;
 			if (difference.minute < 0)
 			{
@@ -264,7 +282,7 @@ public:
 	}
 
 	/*
-		Methods for counting chosen units of time (with initial date 
+		Methods for counting chosen units of time (with initial date
 		for counting days/hours/minutes/seconds and without for year/month)
 	*/
 	unsigned long long number_of_units_of_time(const char mode)
@@ -284,8 +302,8 @@ public:
 		/*
 			We make a copy of date to avoid any changes in variable
 		*/
-		Data copy_of_date {this->year, initial_date.month->month, this->day, this->hour, this->minute, this->second};
-		
+		Data copy_of_date{ this->year, initial_date.month->month, this->day, this->hour, this->minute, this->second };
+
 		/*
 			Counting months
 		*/
@@ -294,7 +312,6 @@ public:
 		/*
 			Counting days, adding days in month on every step
 		*/
-		
 		for (; months > 0; months--)
 		{
 			copy_of_date.day += copy_of_date.days_in_month();
@@ -304,7 +321,7 @@ public:
 				copy_of_date.month = 1;
 			}
 		}
-		
+
 		if (mode == 'd')
 		{
 			return copy_of_date.day;
@@ -323,6 +340,9 @@ public:
 		}
 	}
 
+	/*
+		Methods for adding/substracting chosen units of date to the date 
+	*/
 	void add_time(const long long time, const char mode)
 	{
 		if (mode == 'y')
@@ -351,12 +371,38 @@ public:
 				}
 			}
 			this->day += time;
+			if (this->day > days_in_month())
+			{
+				this->day = days_in_month();
 			}
 		}
 		else if (mode == 'h')
 		{
-			while (time > (23 - this->hour))
+		while (time > (23 - this->hour))
+		{
+			this->day++;
+			if (this->day > days_in_month())
 			{
+				this->day = 1;
+				this->month++;
+				if (this->month > 12)
+				{
+					this->month = 1;
+					this->year++;
+				}
+			}
+			time -= 24;
+		}
+		this->hour += time;
+		}
+		else if (mode == 'm')
+		{
+		while (time > (59 - this->minute))
+		{
+			this->hour++;
+			if (this->hour > 23)
+			{
+				this->hour = 0;
 				this->day++;
 				if (this->day > days_in_month())
 				{
@@ -368,12 +414,17 @@ public:
 						this->year++;
 					}
 				}
-				time -= 24;
 			}
-			this->hour += time;
-		else if (mode == 'm')
+			time -= 60;
+		}
+		this->minute += time;
+		}
+		else
 		{
-			while (time > (59 - this->minute))
+		while (time > (59 - this->second))
+		{
+			this->minute++;
+			if (this->minute > 59)
 			{
 				this->hour++;
 				if (this->hour > 23)
@@ -391,76 +442,164 @@ public:
 						}
 					}
 				}
-				time -= 60;
 			}
-			this->minute += time;
+			time -= 60;
 		}
-		else
-		{
-			while (time > (59 - this->second))
-			{
-				this->minute++;
-				if (this->minute > 59)
-				{
-					this->hour++;
-					if (this->hour > 23)
-					{
-						this->hour = 0;
-						this->day++;
-						if (this->day > days_in_month())
-						{
-							this->day = 1;
-							this->month++;
-							if (this->month > 12)
-							{
-								this->month = 1;
-								this->year++;
-							}
-						}
-					}
-				}
-				time -= 60;
-			}
-			this->second += time;
+		this->second += time;
 		}
 	}
 
 	void subtract_time(const long long time, const char mode)
 	{
-		/*
+		
 		if (mode == 'y')
 		{
 			this->year -= time;
 		}
 		else if (mode == 'M')
 		{
-			if (time > this->month + 1)
+			while (time >= this->month)
 			{
-
+				this->year--;
+				if (time >= 12)
+				{
+					time -= 12;
+				}
+				else
+				{
+					this->month += (12 - time);
+					return;
+				}	
 			}
+			this->month -= time;
 		}
 		else if (mode == 'd')
 		{
+			while (time >= this->day)
+			{
+				this->month--;
+				if (check_date(false, true, false, false, false, false) == false)
+				{
+					this->year--;
+					this->month = 12;
+				}
 
+				if (time >= days_in_month())
+				{
+					time -= days_in_month();
+				}
+				else
+				{
+					this->day += (days_in_month() - time);
+					return;
+				}
+			}
+			this->day -= time;
 		}
 		else if (mode == 'h')
 		{
+			while (time >= this->hour)
+			{
+				this->day--;
+				if (check_date(false, false, true, false, false, false) == false)
+				{
+					this->month--;
+					if (check_date(false, true, false, false, false, false) == false)
+					{
+						this->year--;
+						this->month = 12;
+					}
+					this->day = days_in_month();
+				}
 
+				if (time >= 24)
+				{
+					time -= 24;
+				}
+				else
+				{
+					this->hour += (24 - time);
+					return;
+				}
+			}
 		}
 		else if (mode == 'm')
 		{
+			while (time >= this->minute)
+			{
+				this->hour--;
+				if (check_date(false, false, false, true, false, false) == false)
+				{
+					this->day--;
+					if (check_date(false, false, true, false, false, false) == false)
+					{
+						this->month--;
+						if (check_date(false, true, false, false, false, false) == false)
+						{
+							this->year--;
+							this->month = 12;
+						}
+						this->day = days_in_month();
+					}
+					this->hour = 23;
+				}
 
+				if (this->minute >= 60)
+				{
+					time -= 60;
+				}
+				else
+				{
+					this->minute += (60 - time);
+					return;
+				}
+			}
+			this->minute -= time;
 		}
 		else
 		{
+			while (time >= this->second)
+			{
+				this->minute--;
+				if (check_date(false, false, false, false, true, false) == false)
+				{
+					this->hour--;
+					if (check_date(false, false, false, true, false, false) == false)
+					{
+						this->day--;
+						if (check_date(false, false, true, false, false, false) == false)
+						{
+							this->month--;
+							if (check_date(false, true, false, false, false, false) == false)
+							{
+								this->year--;
+								this->month = 12;
+							}
+							this->day = days_in_month();
+						}
+						this->hour = 23;
+					}
+					this->minute = 59;
+				}
 
+				if (this->second >= 60)
+				{
+					time -= 60;
+				}
+				else
+				{
+					this->second += (60 - time);
+					return;
+				}
+			}
+			this->second -= time;
 		}
-		*/
+		
 	}
 	/*
 		Method for defining day of the week
 	*/
-	string day_of_week()
+	int day_of_week()
 	{
 		/*
 			Kim Larson's formula of defining the day of week:
@@ -475,6 +614,9 @@ public:
 			int year = this->year - 1;
 		}
 		unsigned int index_of_week = (this->day + 2 * month + 3 * (month + 1) / 5 + year + year / 4 - year / 100 + year / 400) % 7;
+		
+		return (index_of_week + 1);
+		/*
 		switch (index_of_week)
 		{
 		case 0: return "Monday"; break;
@@ -484,6 +626,41 @@ public:
 		case 4: return "Friday"; break;
 		case 5: return "Saturday"; break;
 		case 6: return "Sunday"; break;
+		}
+		*/
+	}
+
+	/*
+		Method for counting week of month
+	*/
+	int week_of_month()
+	{
+		Date start_point(this->year, this->month, 1, this->hour, this->minute, this->second);
+		
+		if (start_point.day_of_week() >= day_of_week())
+		{
+			return ((this->day - 1) / 7 + 1);
+		}
+		else
+		{
+			return ((this->day - 1) / 7 + 2);
+		}
+	}
+
+	/*
+		Method for counting week of year
+	*/
+	int week_of_year()
+	{
+		Date start_point(this->year, 1, 1, this->hour, this->minute, this->second);
+
+		if (start_point.day_of_week() >= day_of_week())
+		{
+			return (difference_with_date(start_point).day) / 7 + 1);
+		}
+		else
+		{
+			return ((difference_with_date(start_point).day) / 7 + 2);
 		}
 	}
 };
